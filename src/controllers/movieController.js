@@ -1,4 +1,4 @@
-import { MovieModel } from "./movieModel.js";
+import { MovieModel } from "../models/movieModel.js";
 import { omdbService } from "../services/omdbService.js";
 
 export const MovieController = {

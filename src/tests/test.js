@@ -1,4 +1,4 @@
-import { MovieController } from "./movieController.js";
+import { MovieController } from "../controllers/movieController.js";
 
 const tituloBuscado = "Interstellar"; // Simulación de input
 MovieController.processMovieRequest(tituloBuscado);

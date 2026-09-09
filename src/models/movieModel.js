@@ -15,6 +15,8 @@ export const MovieModel = {
         title: rawJson.Title,
         year: rawJson.Year,
         director: rawJson.Director,
+        genre: rawJson.Genre,
+        plot: rawJson.Plot,
         poster: rawJson.Poster,
         createdAt: new Date().toISOString()
     }),

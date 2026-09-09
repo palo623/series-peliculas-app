@@ -1,5 +1,14 @@
-import { collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { collection, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db } from "../config/firebase.js";
+
+const slugifyTitle = (title) =>
+    title
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "untitled";
 
 export const MovieModel = {
     formatData: (rawJson) => ({
@@ -9,15 +18,6 @@ export const MovieModel = {
         poster: rawJson.Poster,
         createdAt: new Date().toISOString()
     }),
-    existsMovie: async (movieTitle) => {
-        const q = query(
-            collection(db, "movies"),
-            where("title", "==", movieTitle.trim())
-        );
-
-        const snapshot = await getDocs(q);
-        return !snapshot.empty;
-    },
     saveToDatabase: async (movieData) => {
         try {
             if (!db) {
@@ -25,16 +25,18 @@ export const MovieModel = {
             }
 
             const title = movieData.title?.trim();
-            const alreadyExists = await MovieModel.existsMovie(title);
+            const movieId = slugifyTitle(title);
+            const docRef = doc(collection(db, "movies"), movieId);
+            const existing = await getDoc(docRef);
 
-            if (alreadyExists) {
+            if (existing.exists()) {
                 console.log(`⚠️ La película "${title}" ya existe en Firestore.`);
-                return null;
+                return movieId;
             }
 
-            const docRef = await addDoc(collection(db, "movies"), movieData);
-            console.log("✅ Guardado con ID:", docRef.id);
-            return docRef.id;
+            await setDoc(docRef, movieData);
+            console.log("✅ Guardado con ID:", movieId);
+            return movieId;
         } catch (error) {
             console.error("❌ Error en Firestore:", error.message || error);
             throw error;
